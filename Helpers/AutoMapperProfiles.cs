@@ -4,6 +4,7 @@ using ApiTienda.Dtos.Orders;
 using ApiTienda.Dtos.Products;
 using ApiTienda.Dtos.Security.Roles;
 using ApiTienda.Dtos.Security.Users;
+using ApiTienda.Dtos.Transactions;
 using AutoMapper;
 
 namespace ApiTienda.Helpers
@@ -42,6 +43,13 @@ namespace ApiTienda.Helpers
             CreateMap<OrderDetailEditDto, OrderDetailEntity>();
             CreateMap<OrderDetailEntity, OrderDetailDto>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : null));
+
+            // Transacciones
+            CreateMap<TransactionCreateDto, PaymentTransactionEntity>();
+            CreateMap<PaymentTransactionEntity, TransactionDto>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.FechaCreacion))
+                .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => src.Order != null ? src.Order.Status : string.Empty))
+                .ForMember(dest => dest.OrderTotal, opt => opt.MapFrom(src => src.Order != null ? src.Order.TotalAmount : 0));
         }
     }
 } 
