@@ -42,6 +42,7 @@ builder.Services.AddTransient<ICategoryService, CategoryService>();
 builder.Services.AddTransient<IProductService, ProductService>();
 builder.Services.AddTransient<IOrderService, OrderService>();
 builder.Services.AddTransient<ITransactionService, TransactionService>();
+builder.Services.AddHttpClient<IPayPalService, PayPalService>();
 builder.Services.AddTransient<IDataInitializationService, DataInitializationService>();
 builder.Services.AddTransient<IFileService, FileService>();
 
