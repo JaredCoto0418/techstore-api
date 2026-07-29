@@ -41,6 +41,8 @@ builder.Services.AddTransient<IRolesService, RolesService>();
 builder.Services.AddTransient<ICategoryService, CategoryService>();
 builder.Services.AddTransient<IProductService, ProductService>();
 builder.Services.AddTransient<IOrderService, OrderService>();
+builder.Services.AddTransient<ITransactionService, TransactionService>();
+builder.Services.AddHttpClient<IPayPalService, PayPalService>();
 builder.Services.AddTransient<IDataInitializationService, DataInitializationService>();
 builder.Services.AddTransient<IFileService, FileService>();
 
@@ -96,21 +98,20 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = scope.ServiceProvider.GetRequiredService<TiendaDbContext>();
-        
-        // Crear la base de datos si no existe
-        var databaseCreated = await context.Database.EnsureCreatedAsync();
-        
-        if (databaseCreated)
+
+        // Aplicar migraciones pendientes (crea la base de datos si no existe)
+        await context.Database.MigrateAsync();
+        Console.WriteLine("🗄️ Migraciones aplicadas correctamente");
+
+        // Inicializar datos por defecto solo si la base de datos está vacía (primera vez)
+        if (!await context.Users.AnyAsync())
         {
-            Console.WriteLine("🗄️ Base de datos creada por primera vez");
-            
-            // Inicializar datos por defecto solo si la base de datos se creó por primera vez
             var dataInitializationService = scope.ServiceProvider.GetRequiredService<IDataInitializationService>();
             var result = await dataInitializationService.InitializeDataAsync();
-            
+
             if (result.Success)
             {
-                Console.WriteLine("✅ Datos inicializados automáticamente durante la creación de la base de datos");
+                Console.WriteLine("✅ Datos inicializados automáticamente");
                 Console.WriteLine($"📊 Resumen: {result.Message}");
                 if (result.Details != null)
                 {
@@ -130,7 +131,7 @@ using (var scope = app.Services.CreateScope())
         }
         else
         {
-            Console.WriteLine("ℹ️ Base de datos ya existe, saltando inicialización automática");
+            Console.WriteLine("ℹ️ La base de datos ya tiene datos, se omite el seed");
         }
     }
     catch (Exception ex)

@@ -13,6 +13,7 @@ namespace ApiTienda.Database
         public DbSet<CategoryEntity> Categories { get; set; }
         public DbSet<OrderEntity> Orders { get; set; }
         public DbSet<OrderDetailEntity> OrderDetails { get; set; }
+        public DbSet<PaymentTransactionEntity> Transactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -47,6 +48,13 @@ namespace ApiTienda.Database
                 .WithMany()
                 .HasForeignKey(od => od.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Transacción de pago -> Orden
+            builder.Entity<PaymentTransactionEntity>()
+                .HasOne(t => t.Order)
+                .WithMany()
+                .HasForeignKey(t => t.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public override int SaveChanges()
